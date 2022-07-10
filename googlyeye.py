@@ -21,14 +21,17 @@ class GooglyEye:
         self.elastic = elastic
 
     def update(self, ax, ay):
+        # ax/ay is based on the screen. If the accelerometer is orintated
+        # in a different direction the calling routine must pass the correct
+        # values.
         now = time.monotonic()
         dt = now - self.last_update
         self.last_update = now
 
         ax = ax * dt * self.g_scale
         ay = ay * dt * self.g_scale
-        self.vx = (self.vx - ay) * self.drag  # y direction is display -x
-        self.vy = (self.vy + ax) * self.drag  # x direction is display +y
+        self.vx = (self.vx + ax) * self.drag  # y direction is display -x
+        self.vy = (self.vy + ay) * self.drag  # x direction is display +y
 
         # runaway velocity check
         v = self.vx*self.vx + self.vy*self.vy
