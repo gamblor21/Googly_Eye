@@ -97,12 +97,10 @@ while True:
     eye_left.update(eye_ax, eye_ay)
     eye_circle_left.x = int(eye_left.x) + SCREEN_RADIUS
     eye_circle_left.y = int(eye_left.y) + SCREEN_RADIUS
-    display_left.refresh()
 
     eye_right.update(eye_ax, eye_ay)
     eye_circle_right.x = int(eye_right.x) + SCREEN_RADIUS
     eye_circle_right.y = int(eye_right.y) + SCREEN_RADIUS
-    display_right.refresh()
 
     # experimental code to set a limit of FPS will skip frames if we are falling below this
     #if display.refresh(target_frames_per_second=120) is False:
