@@ -18,9 +18,10 @@ G_SCALE = 4     # Change the acceleration speed for looks
 DRAG = 0.999    # Represents friction on the surface lower value = slower
 ELASTIC = 0.80  # Energy we lose bouncing on the edges
 
-SCREEN_RADIUS = 120
-EYE_RADIUS = 30
+EYE_RADIUS = 25
 EYE_RADIUS2 = EYE_RADIUS * EYE_RADIUS
+
+SCREEN_RADIUS = 120
 INNER_RADIUS = SCREEN_RADIUS - EYE_RADIUS
 INNER_RADIUS2 = INNER_RADIUS * INNER_RADIUS
 
@@ -28,22 +29,23 @@ INNER_RADIUS2 = INNER_RADIUS * INNER_RADIUS
 displayio.release_displays()
 
 # LSM9DS1 sensor
-i2c = busio.I2C(board.IO5, board.IO4)
+i2c = busio.I2C(board.SCL, board.SDA)
 sensor = adafruit_lsm9ds1.LSM9DS1_I2C(i2c)
 
-# Set up the display
+# Set up the left display
 tft_clk = board.SCK
-tft_mosi = board.IO35
-tft_rst = board.IO38
-tft_dc = board.IO9
-tft_cs = board.IO8
+tft_mosi = board.MOSI
+tft_rst = board.D9
+tft_dc = board.D10
+tft_cs = board.RX
 spi_left = busio.SPI(clock=tft_clk, MOSI=tft_mosi)
 
-tft_clk2 = board.IO6
-tft_mosi2 = board.IO7
-tft_rst2 = board.IO0
-tft_dc2 = board.IO17
-tft_cs2 = board.IO18
+# Set up the right display
+tft_clk2 = board.A0
+tft_mosi2 = board.A1
+tft_rst2 = board.D11
+tft_dc2 = board.D12
+tft_cs2 = board.A3
 spi_right = busio.SPI(clock=tft_clk2, MOSI=tft_mosi2)
 
 # Make the displayio SPI bus and the GC9A01 display
@@ -87,11 +89,17 @@ skipped = 0
 
 while True:
     ax, ay, az = sensor.acceleration
-    eye_left.update(ax, ay)
+
+    # Orientate the sensor directions to the display directions
+    eye_ax = -az
+    eye_ay = -ax
+
+    eye_left.update(eye_ax, eye_ay)
     eye_circle_left.x = int(eye_left.x) + 120
     eye_circle_left.y = int(eye_left.y) + 120
     display_left.refresh()
-    eye_right.update(ax, ay)
+
+    eye_right.update(eye_ax, eye_ay)
     eye_circle_right.x = int(eye_right.x) + 120
     eye_circle_right.y = int(eye_right.y) + 120
     display_right.refresh()
@@ -109,7 +117,9 @@ while True:
     # Every 500 frames print some information
     if fps % 500 == 0:
         dt = time.monotonic() - start_time
-        print(fps / dt, skipped/dt)
+        print("FPS:",fps / dt, skipped/dt)
+        print("Left:",eye_left.x,eye_left.y,eye_left.vx,eye_left.vy)
+        print("Rght:",eye_right.x,eye_right.y,eye_right.vx,eye_right.vy)
         start_time = time.monotonic()
         fps = 0
         skipped = 0
